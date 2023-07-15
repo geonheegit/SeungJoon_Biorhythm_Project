@@ -1,0 +1,104 @@
+import tkinter as tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import numpy as np
+import math
+
+# 그래프 그리기
+def plot_graph():
+    birth2date = int(entry_byear.get()) * 365 + int(entry_bmonth.get()) * 30 + int(entry_bdate.get())
+    check2date = int(entry_checkyear.get()) * 365 + int(entry_checkmonth.get()) * 30 + int(entry_checkdate.get())
+    diff = abs(birth2date - check2date)
+    around = abs(float(entry_around.get()))
+
+
+    x_max, x_min = diff + around, diff - around
+    x = np.linspace(x_min, x_max, int((x_max - x_min) * 20))
+    # y_formula = entry_y.get()
+    # y = eval(y_formula)
+    y1_formula = "100 * np.sin(2 * math.pi * x / 23)"
+    y2_formula = "100 * np.sin(2 * math.pi * x / 28)"
+    y3_formula = "100 * np.sin(2 * math.pi * x / 33)"
+    y1, y2, y3 = eval(y1_formula), eval(y2_formula), eval(y3_formula)
+    y1_min, y1_max = min(y1), max(y1)
+
+    fig = Figure(figsize=(5, 4), dpi=100)
+    ax = fig.add_subplot(111)
+    ax.plot(x, y1, 'b')
+    ax.plot(x, y2, 'g')
+    ax.plot(x, y3, 'r')
+
+    x_value = diff
+    y1_value = eval(y1_formula.replace("x", str(x_value)))
+    y2_value = eval(y2_formula.replace("x", str(x_value)))
+    y3_value = eval(y3_formula.replace("x", str(x_value)))
+
+    ax.plot(x_value, y1_value, 'ro')
+    ax.annotate(f'({x_value:.1f}, {y1_value:.1f})', xy=(x_value, y1_value),
+                xytext=(x_value + 0.2, y1_value + 0.2), fontsize=10)
+
+    ax.plot(x_value, y2_value, 'ro')
+    ax.annotate(f'({x_value:.1f}, {y2_value:.1f})', xy=(x_value, y2_value),
+                xytext=(x_value + 0.2, y2_value + 0.2), fontsize=10)
+
+    ax.plot(x_value, y3_value, 'ro')
+    ax.annotate(f'({x_value:.1f}, {y3_value:.1f})', xy=(x_value, y3_value),
+                xytext=(x_value + 0.2, y3_value + 0.2), fontsize=10)
+
+    ax.hlines(y1_value, x_min, x_max, color='grey', linestyle='--', linewidth=1)
+    ax.hlines(y2_value, x_min, x_max, color='grey', linestyle='--', linewidth=1)
+    ax.hlines(y3_value, x_min, x_max, color='grey', linestyle='--', linewidth=1)
+
+    ax.vlines(x_value, y1_min, y1_max, color='grey', linestyle='--', linewidth=1)
+
+    formula_label.config(text=f"y1 = {y1_formula}, y2 = {y2_formula}, y3 = {y3_formula}")
+
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    canvas.draw()
+    canvas.get_tk_widget().place(x=10, y=100)
+
+
+# UI 만들기
+window = tk.Tk()
+window.title("바이오 리듬")
+window.geometry("1000x600")
+
+# 입력 필드 추가
+entry_byear = tk.Entry(window)
+entry_byear.insert(0, "출생년도(4자리)")
+entry_byear.place(x=10, y=10)
+
+entry_bmonth = tk.Entry(window)
+entry_bmonth.insert(0, "출생달(1자리 혹은 2자리)")
+entry_bmonth.place(x=160, y=10)
+
+entry_bdate = tk.Entry(window)
+entry_bdate.insert(0, "출생일(1자리 혹은 2자리)")
+entry_bdate.place(x=310, y=10)
+
+entry_checkyear = tk.Entry(window)
+entry_checkyear.insert(0, "확인 년도(4자리)")
+entry_checkyear.place(x=10, y=40)
+
+entry_checkmonth = tk.Entry(window)
+entry_checkmonth.insert(0, "확인 달(1자리 혹은 2자리)")
+entry_checkmonth.place(x=160, y=40)
+
+entry_checkdate = tk.Entry(window)
+entry_checkdate.insert(0, "확인 일(1자리 혹은 2자리)")
+entry_checkdate.place(x=310, y=40)
+
+entry_around = tk.Entry(window)
+entry_around.insert(0, "교점 주변으로 거리")
+entry_around.place(x=610, y=10)
+
+# 버튼 추가
+plot_button = tk.Button(window, text="그래프 그리기", command=plot_graph)
+plot_button.place(x=460, y=10)
+
+# 그래프 수정 정보 표시
+formula_label = tk.Label(window, text="")
+formula_label.place(x=10, y=520)
+
+# UI 실행
+window.mainloop()
